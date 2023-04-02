@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://bootswatch.com/4/minty/bootstrap.min.css">
+  <title>Lunch.ly {% block title %}{% endblock %}</title>
+</head>
+
+<body>
+
+  <div class="container-fixed">
+
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="/">Lunch.ly</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">
+              Customers <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add/">Add a Customer</a>
+          </li>
+          <li class="nav-item">
+            <input list="searchdata" id="search" class="nav-search" name="customer_search" placeholder="search">
+            <datalist class="searchdata" id="searchdata">
+              <option value="test1">
+              <option value="test2">
+            </datalist>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+  </div>
+  <div class="container">
+
+    <div id="content" style="margin-top: 80px">
+      {% block content %}{% endblock %}
+    </div>
+
+  </div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const searchField = document.getElementById("search");
+    const searchData = document.getElementById("searchdata");
+    searchField.addEventListener("keydown", (event) => {
+    if (event.keyCode === 13 || event.which === 13) { // Enter key     
+        window.location.href = `/search?term=${searchField.value}`
+      }
+    });
+    searchField.onkeyup = function () {
+      console.log(searchField.value);
+      let dataPromise = axios.get(`/presearch?term=${searchField.value}`);
+      dataPromise.then(data => {
+        console.log("Customers data: ", data.data);
+        let customersList = JSON.parse(data.data);
+        console.log("Customers: ", customersList);
+        console.log("Customer: ", customersList[0]);
+        
+        searchData.innerHTML = "";
+        for (let customer of customersList) {
+          console.log("Customer: ", customer);
+          let fullname = customer.firstName +" "+ customer.lastName;
+          console.log(`Fullname: ${fullname}`);
+          let option = document.createElement("option");
+          option.value = fullname;
+          // option.textContent = customer.firstName + ' ' + customer.lastName;
+
+          searchData.appendChild(option);
+        }
+
+      })
+      .catch(error => {
+        console.log(error);
+        });
+    }
+
+  </script>
+</body>
+
+</html>
